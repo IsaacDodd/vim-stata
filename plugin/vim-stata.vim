@@ -93,7 +93,9 @@ function! RunDoLines()
 	let s:hasdarwin = system("uname -s") =~ 'Darwin'
 	" Set some default path variables in case the user does not specify needed paths
 	let g:vimforstata_pathbin_ifnotset_linux = "/usr/local/stata/xstata"
-	let g:vimforstata_pathbin_ifnotset_windows = "C:\\Program Files(x86)\\Stata15\\Stata-64.exe"
+	let g:vimforstata_pathbin_ifnotset_windows = "C:\\Program Files (x86)\\Stata15\\Stata-64.exe"
+	let g:vimforstata_pathbin_binarypath_ifnotset_windows = "C:\\Program Files (x86)\\Stata15\\"
+	let g:vimforstata_pathbin_binaryexe_ifnotset_windows = "Stata-64.exe"
 
 	if has("unix") && executable("gvfs-open") && !s:haskdeinit
 		" For Gnome-based Linux Desktop Environments
@@ -129,14 +131,51 @@ function! RunDoLines()
 		" For MacOS
 		exe "silent !open ".args
 		let ret= v:shell_error
-	elseif has("win32") || has("win64")
-		" For Windows, 32 or 64 bit
-    	exe "silent !start explorer ".shellescape(path,1)
-		let ret= v:shell_error
-		if (ret != 0)
-			exe "silent !start explorer ".g:vimforstata_pathbin_ifnotset_windows." do ".args
+	elseif has("win16") || has("win32") || has("win64") || has("gui_win32")
+		" Set the default path if the user has not pre-specified their own path.
+		if exists(g:vimforstata_pathbin_binarypath_windows)
+			let winpath_binarypath = g:vimforstata_pathbin_binarypath_windows
+		else
+			let winpath_binarypath = g:vimforstata_pathbin_binarypath_ifnotset_windows
 		endif
-
+		if exists(g:vimforstata_pathbin_binaryexe_windows)
+			let winpath_binaryexe = g:vimforstata_pathbin_binaryexe_windows
+		else
+			let winpath_binaryexe = g:vimforstata_pathbin_binaryexe_ifnotset_windows
+		endif
+		
+		" Try 1: Try to start Stata with the binary executable method.
+		try
+			if (executable(winpath_binaryexe))
+				exe "silent !start ".winpath_binaryexe." do ".args
+			endif		
+		catch
+			try
+				" Try 2: Try to start Stata with the direct path method instead.
+				let ret= v:shell_error
+				if (ret != 0)
+					exe "silent !start ".winpath_binarypath." do ".args
+				endif
+			catch
+				try
+					"Try 3: Try to start Stata with the explorer method instead.
+					let ret= v:shell_error
+					if (ret != 0)
+						exe "silent !start explorer ".winpath_binarypath." do ".args
+					endif
+					
+					let ret= v:shell_error
+					if (ret != 0)
+						exe "silent !start explorer ".shellescape(path,1)
+					endif
+				catch
+					echohl ErrorMsg
+					echomsg 'Error: The do lines could not be executed because your binary executable could not be found on PATH.'
+					echohl None
+				endtry
+			endtry
+		endtry
+		
 		" Delete the temp file after Vim closes in Windows
 		au VimLeave * exe "!del -y" temp
 	else 
