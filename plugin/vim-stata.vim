@@ -6,7 +6,7 @@
 "Script Version: 1.0.2 Beta
 "Last Edited: 2nd December 2015
 "Authors: Zizhong Yan (coding) & Chuhong Wang (testing & debugging)
-"Contributors: Isaac M. E. Dodd (Linux compatibility)
+"Contributors: Isaac M. E. Dodd (Linux & Windows compatibility)
 "Contacts: helloyzz@gmail.com
 "Configurations:
 "		1, Installation

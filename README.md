@@ -1,34 +1,37 @@
 # Vim Plugin for Running Selected Do-File Lines in Stata
 
-With this plugin, you can replace Stata's DO file editor with Vim, running do file commands directly from Vim.
+With this plugin, you can replace Stata's DO file editor with Vim, running do file commands directly from within Vim.
 
 Vim is known as a highly configurable text editor built to enable efficient text editing, and Stata is one of the most popular statistical packages with a huge user-community. This plugin (beta) is developed to make connections between Vim and Stata and supports Mac OS X and Linux. With our plugin, you could easily send selected do file lines from Vim to have them run in Stata. To the best of our knowledge, this is probably the first plugin to link Vim and Stata under Unix-like platforms. (For Windows users, please refer to the information in the last section). Please feel free to let us know if you have any comments or suggestions.
 
 ## Updates
+**Windows Support Improvements**: Previously, the code was not compatible with the settings of some editions of Windows. This update significantly improves Windows compatibility and gives the ability to prespecify binaries for different versions of Stata (IC, MP, etc.) to run Do file lines in Windows. Edits to the plugin were made by [Isaac M. E. Dodd](https://github.com/IsaacDodd/).
+(Last edited on 13 Apr 2019 by [I Dodd](https://github.com/IsaacDodd/))
+
 **Linux Support**: This update adds support for Linux systems to run Do file lines. Edits to the plugin were made by [Isaac M. E. Dodd](https://github.com/IsaacDodd/).
 (Last edited on 01 Apr 2019 by [I Dodd](https://github.com/IsaacDodd/))
 
-**Syntax highlighting**: This update enables the Stata syntax highlighting in Vim. An updated and enhanced Stata syntax file has been included (based on Jeffrey Pitblado's Stata syntax file). (Thanks for William Buchanan's suggestion.)
+**Syntax Highlighting**: This update enables the Stata syntax highlighting in Vim. An updated and enhanced Stata syntax file has been included (based on Jeffrey Pitblado's Stata syntax file). (Thanks for William Buchanan's suggestion.)
 (Last edited on 29 Feb 2016 by [Z Yan](mailto:helloyzz@gmail.com) and [C Wang](mailto:flora7819@gmail.com) )
 
 ## Configurations:
 
 ### 1, Installation Options
 
-1.1. **Manual Installation**: Put `vim-stata.vim` (the plugin file) directly into your Vim directory. In Windows or MacOS this is either `vimfiles/plugin` or `vim81/plugin`. In Linux, this is `.vim`
-
-1.2. **Package/Plugin Managers**: A Vim plugin can be used to easily install this plugin from the git repository. Or use the plugins  or [pathogen.vim](https://github.com/tpope/vim-pathogen) to install it from the git repository.
+1.1. **Package/Plugin Managers**: A Vim plugin can be used to easily install this plugin from this git repository by adding the follow to your vimrc file.
 
 For the [Vim-Plug](https://github.com/junegunn/vim-plug) Plugin Manager: `Plug 'zizhongyan/vim-stata'`
 
 For the [Vundle](https://github.com/VundleVim/Vundle.vim) Plugin Manager: `Plugin 'zizhongyan/vim-stata'`
 
-For Pathogen.vim:
+For [Pathogen.vim](https://github.com/tpope/vim-pathogen):
 
 ```
 cd ~/.vim/bundle
 git clone https://github.com/zizhongyan/vim-stata
 ```
+
+1.2. **Manual Installation**: Put `vim-stata.vim` (the plugin file) directly into your Vim directory. In Windows or MacOS this is either `vimfiles/plugin` or `vim81/plugin`. In Linux, this is `.vim`
 
 ### 2, To ensure that the do-files open in Stata by default and hence are executed directly, we need to make the following two changes.
 
@@ -82,12 +85,12 @@ On Windows, without the following settings you may see the following error: `E37
 
 - **Step 1**: Click on Start and type in 'Stata' until you see the icon for launching Stata pop up.
 - **Step 2**: Right-click the Stata icon and choose '*Open file location*'. This will take you to a folder with the shortcut file to Stata (it has a little arrow at the bottom left). Right-click this Stata shortcut file and choose '*Properties*'.
-- **Step 3**: In the Shortcut tab next to '*Target:*' you should see something to the effect of `"C:\Program Files (x86)\Stata15\Stata-64.exe" /UseRegistryStartin` -- Just copy the path in double-quotes (but not including the double-quotes). Paste the path with the 'Stata-64.exe' at the end, like so, into both of the variables below:
+- **Step 3**: In the Shortcut tab next to '*Target:*' you should see something to the effect of `"C:\Program Files (x86)\Stata15\Stata-64.exe" /UseRegistryStartin` -- Just copy the path in double-quotes (but not including the double-quotes). Paste just the path without the executable filename (i.e., remove the 'Stata-64.exe' at the end) into the first line, then paste the entire path including the executable filename (i.e., with the 'Stata-64.exe' at the end) into the second variable, like so:
 
 ```
 	" Vim-Stata Settings:
 	" 	(1) Path to Stata - Set both of these variables: Paste in the path with the executable filename: 
-	let $PATH=$PATH.';C:\Program Files (x86)\Stata15\Stata-64.exe'
+	let $PATH=$PATH.';C:\Program Files (x86)\Stata15\'
 	let g:vimforstata_pathbin_binarypath_windows = 'C:\Program Files (x86)\Stata15\Stata-64.exe'
 ```
 
@@ -101,6 +104,20 @@ Having these in your `_vimrc` file makes Vim add the location to Vim's copy of t
 ```
 
 This variable is checked first for launching Stata. This also lowers the ambiguity due to alternate copies of Stata in the same directory, for instance those who have to use 'Stata-64_old.exe', or those with multiple executables (IC, MP, etc.) in the same directory.
+
+#### The Multi-Operating System Method
+
+If you use the same vimrc file on different computers with both operating systems, you can simply put these settings in a conditional if statement in your vimrc, like so:
+
+```
+if has("linux")
+	let g:vimforstata_pathbin = "/usr/local/stata15/xstata"
+elseif has("win16") || has("win32") || has("win64") || has("gui_win32")
+	let $PATH=$PATH.';C:\Program Files (x86)\Stata15\'
+	let g:vimforstata_pathbin_binarypath_windows = 'C:\Program Files (x86)\Stata15\Stata-64.exe'
+	let g:vimforstata_pathbin_binaryexe_windows = 'Stata-64.exe'
+endif
+```
 
 ### 4, Hotkey Binding (optional by recommended)
 The hotkey for executing selected codes is set to be `F9` by default.
